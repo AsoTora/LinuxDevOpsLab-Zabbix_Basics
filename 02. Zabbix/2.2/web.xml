@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <servlet>
+            <servlet-name>GenericServlet</servlet-name>
+            <servlet-class>com.epam.nix.java.testapp.servlet.GenericServlet</servlet-class>
+            <multipart-config>
+                <max-file-size>10485760</max-file-size>
+                <max-request-size>20971520</max-request-size>
+                <file-size-threshold>5242880</file-size-threshold>
+            </multipart-config>
+        </servlet>
+
+        <servlet-mapping>
+            <servlet-name>GenericServlet</servlet-name>
+            <url-pattern>/generic/</url-pattern>
+        </servlet-mapping>
+
+    <servlet>
+        <servlet-name>DeadlockServlet</servlet-name>
+        <servlet-class>com.epam.nix.java.testapp.servlet.DeadlockServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeadlockServlet</servlet-name>
+        <url-pattern>/deadlock/</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>MemoryLeakServlet</servlet-name>
+        <servlet-class>com.epam.nix.java.testapp.servlet.MemoryLeakServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>20971520</max-request-size>
+            <file-size-threshold>5242880</file-size-threshold>
+        </multipart-config>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>MemoryLeakServlet</servlet-name>
+        <url-pattern>/memoryleak/</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>PerformanceIssueServlet</servlet-name>
+        <servlet-class>com.epam.nix.java.testapp.servlet.PerformanceIssueServlet</servlet-class>
+        <multipart-config>
+            <max-file-size>10485760</max-file-size>
+            <max-request-size>20971520</max-request-size>
+            <file-size-threshold>5242880</file-size-threshold>
+        </multipart-config>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>PerformanceIssueServlet</servlet-name>
+        <url-pattern>/PerformanceIssue/</url-pattern>
+    </servlet-mapping>
+</web-app>
