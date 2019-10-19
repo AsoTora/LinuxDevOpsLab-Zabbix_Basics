@@ -1,7 +1,13 @@
 #!/usr/bin/bash
 
 # vars
-source /tmp/vars
+zabbix_db_pass="password"
+DBName="zabbix"
+DBUser="zabbix"
+host="localhost"
+zone="Europe/Minsk"
+server_ip="192.168.56.11"
+agent_ip="192.168.56.33"
 
 # install dependencies
 sudo yum install -y vim net-tools epel-release
@@ -39,7 +45,7 @@ sudo echo "
         ServerName ${server_ip}
         DocumentRoot /usr/share/zabbix
 </VirtualHost>
-" >/etc/httpd/conf.d/vhosts.conf
+" > /etc/httpd/conf.d/vhosts.conf
 
 systemctl enable httpd
 systemctl enable zabbix-server
@@ -59,7 +65,25 @@ Server=127.0.0.1
 ListenPort=10050
 ListenIP=0.0.0.0
 StartAgents=3
-" >/etc/zabbix/zabbix_agentd.conf
+" > /etc/zabbix/zabbix_agentd.conf
 
 systemctl enable zabbix-agent
 systemctl start zabbix-agent
+
+
+# set up java getaway
+wget https://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-java-gateway-4.2.1-1.el7.x86_64.rpm
+sudo yum install -y zabbix-java-gateway-4.2.1-1.el7.x86_64.rpm
+
+systemctl enable zabbix-java-gateway
+systemctl start zabbix-java-gateway
+
+echo "
+# Java Gateway settings
+JavaGateway=${server_ip}
+JavaGatewayPort=10052
+StartJavaPollers=5
+" >> /etc/zabbix/zabbix_server.conf
+
+# DEBUG
+# zabbix_server -R log_level_increase
