@@ -1,13 +1,7 @@
 #!/usr/bin/bash
 
 # vars
-zabbix_db_pass="password"
-DBName="zabbix"
-DBUser="zabbix"
-host="localhost"
-zone="Europe/Minsk"
-server_ip="192.168.56.11"
-agent_ip="192.168.56.33"
+source /tmp/vars
 
 # install dependencies
 sudo yum install -y vim net-tools epel-release

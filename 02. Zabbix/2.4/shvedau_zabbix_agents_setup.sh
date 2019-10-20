@@ -1,10 +1,7 @@
 #!/usr/bin/bash
 
 # vars
-server_ip="192.168.56.11"
-agent_ip="192.168.56.33"
-jmx_port=12345
-rmi_port=12346
+source /tmp/vars
 
 
 # install dependencies
