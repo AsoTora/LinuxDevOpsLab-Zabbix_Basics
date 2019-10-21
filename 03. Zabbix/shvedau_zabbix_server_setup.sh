@@ -17,9 +17,11 @@ mysql -uroot -e "grant all privileges on zabbix.* to '${DBUser}'@'${host}' ident
 
 # Zabbix Server
 sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
-sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
-sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
 sleep 10
+
+# mirrors had download errors
+sudo yum install -y zabbix-server-mysql zabbix-web-mysql zabbix-agent
+sudo yum install -y zabbix-server-mysql zabbix-web-mysql zabbix-agent
 sudo yum install -y zabbix-server-mysql zabbix-web-mysql zabbix-agent
 
 zcat /usr/share/doc/zabbix-server-mysql-*/create.sql.gz | mysql -u"${DBUser}" -p"${zabbix_db_pass}" zabbix
@@ -66,10 +68,10 @@ StartAgents=3
 systemctl enable zabbix-agent
 systemctl start zabbix-agent
 
-# server-frontend
-# sudo cp /vagrant/zabbix.conf.php /etc/zabbix/web/
+# server-frontend setup
+sudo cp /vagrant/zabbix.conf.php /etc/zabbix/web/
 
-# set up java getaway
+# setup java getaway
 wget https://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-java-gateway-4.2.1-1.el7.x86_64.rpm
 sudo yum install -y zabbix-java-gateway-4.2.1-1.el7.x86_64.rpm
 
