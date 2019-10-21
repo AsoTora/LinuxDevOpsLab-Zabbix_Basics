@@ -17,9 +17,9 @@ mysql -uroot -e "grant all privileges on zabbix.* to '${DBUser}'@'${host}' ident
 
 # Zabbix Server
 sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
-sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
-sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
 sleep 10
+sudo yum install -y zabbix-server-mysql zabbix-web-mysql zabbix-agent
+sudo yum install -y zabbix-server-mysql zabbix-web-mysql zabbix-agent
 sudo yum install -y zabbix-server-mysql zabbix-web-mysql zabbix-agent
 
 zcat /usr/share/doc/zabbix-server-mysql-*/create.sql.gz | mysql -u"${DBUser}" -p"${zabbix_db_pass}" zabbix
@@ -27,7 +27,7 @@ zcat /usr/share/doc/zabbix-server-mysql-*/create.sql.gz | mysql -u"${DBUser}" -p
 # Database configuration
 sudo cp -f /vagrant/zabbix_server.conf /etc/zabbix/zabbix_server.conf
 echo "
-DBHost=${host}
+DBHost=${host}+
 DBName=${DBName}
 DBUser=${DBUser}
 DBPassword=${zabbix_db_pass}
@@ -67,7 +67,7 @@ systemctl enable zabbix-agent
 systemctl start zabbix-agent
 
 # server-frontend
-# sudo cp /vagrant/zabbix.conf.php /etc/zabbix/web/
+sudo cp /vagrant/zabbix.conf.php /etc/zabbix/web/
 
 # set up java getaway
 wget https://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-java-gateway-4.2.1-1.el7.x86_64.rpm
