@@ -93,3 +93,47 @@ pip install py-zabbix
 pip install pyzabbix
 
 python2 /vagrant/host_register.py
+
+
+# logs setup
+# https://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html
+echo '
+<Context privileged="true" antiResourceLocking="false"
+         docBase="${catalina.home}/webapps/manager">
+    <Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="^.*$" />
+</Context>
+' > /opt/tomcat/conf/Catalina/localhost/manager.xml 
+
+rm -rf /opt/tomcat/conf/tomcat-users.xml 
+echo '
+<?xml version="1.0" encoding="UTF-8"?>
+<tomcat-users xmlns="http://tomcat.apache.org/xml"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
+              version="1.0">
+  <role rolename="manager-gui"/>
+  <user username="tomcat" password="password" roles="manager-gui"/>
+  <role rolename="admin-gui"/>
+  <user username="tomcat" password="password" roles="manager-gui,admin-gui"/>
+
+</tomcat-users>
+' > /opt/tomcat/conf/tomcat-users.xml 
+systemctl restart tomcat
+
+# install web-app
+if [ -d "/opt/tomcat/webapps/TestApp" ]; then
+    sudo rm -f /opt/tomcat/webapps/TestApp.war
+    sudo rm -rf /opt/tomcat/webapps/TestApp
+fi
+cp /vagrant/TestApp.war /opt/tomcat/webapps/
+sleep 10
+sudo cp -f /vagrant/web.xml /opt/tomcat/webapps/TestApp/WEB-INF/web.xml
+sudo systemctl restart tomcat
+
+
+# external script
+cp /vagrant/cores.sh /tmp/cores.sh
+cp /vagrant/cores.sh /usr/lib/zabbix/externalscripts/cores.sh
+
+# permissions
+chmod 755 /opt/tomcat/logs/*

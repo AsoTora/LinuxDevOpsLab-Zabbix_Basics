@@ -86,3 +86,8 @@ StartJavaPollers=5
 " >> /etc/zabbix/zabbix_server.conf
 
 systemctl restart zabbix-agent
+
+# external script
+cp /vagrant/cores.sh /tmp/cores.sh
+cp /vagrant/cores.sh /usr/lib/zabbix/externalscripts/cores.sh
+chmod 755 /tmp/cores.sh /usr/lib/zabbix/externalscripts/cores.sh
