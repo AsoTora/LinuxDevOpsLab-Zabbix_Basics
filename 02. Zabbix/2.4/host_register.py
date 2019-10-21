@@ -25,25 +25,21 @@ server_url = "http://192.168.56.11:"
 zabbix_user = 'Admin'
 user_password = 'zabbix'
 
-Templatename = "custom template111333"
-Hostname = "tomcat111333"
-GroupName = "CloudHosts011"
+Templatename = "custom template"
+Hostname = "tomcat"
+GroupName = "CloudHosts"
 
 # functions
-def create_group(session,gname):
+def create_group(session, gname):
     group = session.hostgroup.create(name=gname)
     return group['groupids'][0]
 
-# TODO
-def create_template(session,tname):
     None
 
-def create_host(session,hname):
-    None
 
 # Connect to ZabbixAPI
 zapi = ZabbixAPI(server_url)
-zapi.session.verify = False # disable ssl
+zapi.session.verify = False  # disable ssl
 zapi.login(zabbix_user, user_password)
 print("Connected to Zabbix API Version %s" % zapi.api_version())
 
@@ -57,64 +53,74 @@ for host in hosts:
 
 # Output current groups
 print '*** HOST GROUPS ***'
-groups = zapi.hostgroup.get(output=['itemid','name'])
+groups = zapi.hostgroup.get(output=['itemid', 'name'])
 for group in groups:
     print group['groupid'] + ": " + group['name']
 
 
 # Create user-group
 group_id = ""
-groups = zapi.hostgroup.get(output=['itemid'],filter={"name":GroupName})
+groups = zapi.hostgroup.get(output=['itemid'], filter={"name": GroupName})
 if not groups:
-    group_id = create_group(zapi,GroupName)
+    group_id = create_group(zapi, GroupName)
 else:
     group_id = groups[0]['groupid']
 
 # create template
 #template = zapi.template.create(output=['itemid','name'], host=[Templatename], groups={'groupid': group_id})
-#for t in template: 
-#    print t['itemid'] + ": " + t['name']
 template_id = ""
 try:
-    templates = zapi.do_request('template.create',    
-        {
-            "host": Templatename,
-            "groups": {
-                "groupid": group_id
-            },
-        })
+    templates = zapi.do_request('template.create',
+                                {
+                                    "host": Templatename,
+                                    "groups": {
+                                        "groupid": group_id
+                                    },
+                                })
     for t in templates['result']['templateids']:
         template_id = t
 
 except Exception as e:
-    print e
+    print e.message
 
 # create host
-hosts = zapi.do_request('host.create',
-    {
-        "host": Hostname,
-        "interfaces": [
-            {
-                "type": 1,
-                "main": 1,
-                "useip": 1,
-                "ip": host_ip,
-                "dns": "",
-                "port": "10050"
-            }
-        ],
-        "groups": [
-            {
-                "groupid": group_id
-            }
-        ],
-        "templates": [
-            {
-                "templateid": template_id
-            },
-            {
-				"templateid": "10001"
-			}
-		
-        ]
-    })
+try:
+    hosts = zapi.do_request('host.create',
+                            {
+                                "host": Hostname,
+                                "interfaces": [
+                                    {
+                                        "type": 1,
+                                        "main": 1,
+                                        "useip": 1,
+                                        "ip": host_ip,
+                                        "dns": "",
+                                        "port": "10050"
+                                    }
+                                ],
+                                "groups": [
+                                    {
+                                        "groupid": group_id
+                                    }
+                                ],
+                                "templates": [
+                                    {
+                                        "templateid": template_id
+                                    },
+                                    {
+                                        "templateid": "10001"
+                                    }
+
+                                ]
+                            })
+
+except Exception as e:
+    print e.message
+
+print "PYTHON HAS SUCCESSFULLY FINISHED THE JOB"
+
+# TODO
+def create_template(session, tname):
+    None
+def create_host(session, hname):
+    None

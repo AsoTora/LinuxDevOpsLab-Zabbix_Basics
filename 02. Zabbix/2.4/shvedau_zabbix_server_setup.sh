@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 # vars
-source /tmp/vars
+source /vagrant/variables.conf
 
 # install dependencies
 sudo yum install -y vim net-tools epel-release

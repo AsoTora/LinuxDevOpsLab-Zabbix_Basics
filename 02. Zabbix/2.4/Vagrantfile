@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
       vb.name = "shvedau_zabbix1_vm"
     end
 
-    zabbix1.vm.provision "file", source: "./variables.conf", destination: "/tmp/vars"
+    # zabbix1.vm.provision "file", source: "./variables.conf", destination: "/tmp/vars"
     zabbix1.vm.provision "shell", path: "shvedau_zabbix_server_setup.sh"
   end
 
@@ -34,7 +34,8 @@ Vagrant.configure("2") do |config|
       vb.name = "shvedau_zabbix2_vm"
     end
 
-    zabbix2.vm.provision "file", source: "./variables.conf", destination: "/tmp/vars"
+    # zabbix2.vm.provision "file", source: "./host_register.py", destination: "/tmp/host_register.py"
+    # zabbix2.vm.provision "file", source: "./variables.conf", destination: "/tmp/vars"
     zabbix2.vm.provision "shell", path: "shvedau_zabbix_agents_setup.sh"
   end
 end

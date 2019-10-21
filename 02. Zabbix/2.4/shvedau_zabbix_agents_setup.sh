@@ -1,8 +1,7 @@
 #!/usr/bin/bash
 
 # vars
-source /tmp/vars
-
+source /vagrant/variables.conf
 
 # install dependencies
 sudo yum install -y vim net-tools epel-release
@@ -85,3 +84,10 @@ install_tomcat
 wget http://repo2.maven.org/maven2/org/apache/tomcat/tomcat-catalina-jmx-remote/8.5.47/tomcat-catalina-jmx-remote-8.5.47.jar
 sudo cp tomcat-catalina-jmx-remote-8.5.47.jar /opt/tomcat/lib/
 
+# set-up python env
+sudo yum install -y python-pip
+sudo pip install --upgrade pip
+pip install py-zabbix
+pip install pyzabbix
+
+python2 /vagrant/host_register.py
