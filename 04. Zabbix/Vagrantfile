@@ -11,32 +11,33 @@ Vagrant.configure("2") do |config|
   config.vm.box = BOX
 
   # main machine 
-  config.vm.define "shvedau_zabbix_server1" do |zabbix1|
+  config.vm.define "shvedau_vm1" do |zabbix1|
     zabbix1.vm.network "private_network", ip: server_ip
-    zabbix1.vm.hostname = "zabbix-main"
+    zabbix1.vm.hostname = "vm11"
 
     zabbix1.vm.provider "virtualbox" do |vb|
-      vb.memory = 4096
-      vb.name = "shvedau_zabbix1_vm"
+      vb.memory = 2048
+      vb.name = "shvedau_vm1_tomcat"
     end
 
-    # zabbix1.vm.provision "file", source: "./variables.conf", destination: "/tmp/vars"
-    zabbix1.vm.provision "shell", path: "shvedau_zabbix_server_setup.sh"
+    # # using dos2unix due to the empty char's in files problems on windows-vagrant-centos setup
+    # zabbix1.vm.provision "shell", inline: "sudo yum install -y dos2unix && dos2unix /vagrant/*"
+    zabbix1.vm.provision "shell", path: "shvedau_vm1_setup.sh"
   end
 
   # second machine
-  config.vm.define "shvedau_zabbix_server2" do |zabbix2|
+  config.vm.define "shvedau_vm2" do |zabbix2|
     zabbix2.vm.network "private_network", ip: agent_ip
-    zabbix2.vm.hostname = "zabbix-agents"
+    zabbix2.vm.hostname = "vm33"
 
     zabbix2.vm.provider "virtualbox" do |vb|
       vb.memory = 2048
-      vb.name = "shvedau_zabbix2_vm"
+      vb.name = "shvedau_vm2_kibana"
     end
 
-    # zabbix2.vm.provision "file", source: "./host_register.py", destination: "/tmp/host_register.py"
-    # zabbix2.vm.provision "file", source: "./variables.conf", destination: "/tmp/vars"
-    zabbix2.vm.provision "shell", path: "shvedau_zabbix_agents_setup.sh"
+    ## using dos2unix due to the empty char's in files problems on windows-vagrant-centos setup
+    # zabbix2.vm.provision "shell", inline: "sudo yum install -y dos2unix && dos2unix /vagrant/*"
+    zabbix2.vm.provision "shell", path: "shvedau_vm2_setup.sh"
   end
 end
     

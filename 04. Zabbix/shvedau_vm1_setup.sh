@@ -1,34 +1,16 @@
 #!/usr/bin/bash
 
-# vars
-source /vagrant/variables.conf
+# configuration
+server_ip="192.168.56.11"
+agent_ip="192.168.56.33"
+
+# JVM
+jmx_port="12345"
+rmi_port="12346"
+
 
 # install dependencies
 sudo yum install -y vim net-tools epel-release
-sudo yum install -y http://repo.zabbix.com/zabbix/4.2/rhel/7/x86_64/zabbix-release-4.2-1.el7.noarch.rpm
-sudo yum install -y zabbix-agent
-sudo yum install -y zabbix-agent
-sudo yum install -y zabbix-agent
-
-# agent configuration
-sudo rm -rf  /etc/zabbix/zabbix_agentd.conf
-echo "
-# Common
-PidFile=/var/run/zabbix/zabbix_agentd.pid
-LogFile=/var/log/zabbix/zabbix_agentd.log
-DebugLevel=3
-
-# checks related
-Server=${server_ip}
-ServerActive=${server_ip}
-ListenPort=10050
-ListenIP=0.0.0.0
-StartAgents=3
-" > /etc/zabbix/zabbix_agentd.conf
-
-systemctl enable zabbix-agent
-systemctl start zabbix-agent
-
 
 # Tomcat
 install_tomcat (){
@@ -77,50 +59,36 @@ install_tomcat (){
         ' > /etc/systemd/system/tomcat.service
         sudo systemctl daemon-reload
     fi
-
     sudo systemctl start tomcat
+
+    mkdir -p /opt/tomcat/conf/Catalina/localhost/
+    # https://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html
+    echo '
+    <Context privileged="true" antiResourceLocking="false"
+            docBase="${catalina.home}/webapps/manager">
+        <Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="^.*$" />
+    </Context>
+    ' > /opt/tomcat/conf/Catalina/localhost/manager.xml 
+
+    rm -rf /opt/tomcat/conf/tomcat-users.xml 
+    echo '
+    <?xml version="1.0" encoding="UTF-8"?>
+    <tomcat-users xmlns="http://tomcat.apache.org/xml"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
+                version="1.0">
+    <role rolename="manager-gui"/>
+    <user username="tomcat" password="password" roles="manager-gui"/>
+    <role rolename="admin-gui"/>
+    <user username="tomcat" password="password" roles="manager-gui,admin-gui"/>
+
+    </tomcat-users>
+    ' > /opt/tomcat/conf/tomcat-users.xml 
+    systemctl restart tomcat
 }
 install_tomcat
 
-# remote module
-wget http://repo2.maven.org/maven2/org/apache/tomcat/tomcat-catalina-jmx-remote/8.5.47/tomcat-catalina-jmx-remote-8.5.47.jar
-sudo cp tomcat-catalina-jmx-remote-8.5.47.jar /opt/tomcat/lib/
-
-# set-up python env
-sudo yum install -y python-pip
-sudo pip install --upgrade pip
-pip install py-zabbix
-pip install pyzabbix
-
-python2 /vagrant/host_register.py
-
-
-# logs setup
-# https://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html
-echo '
-<Context privileged="true" antiResourceLocking="false"
-         docBase="${catalina.home}/webapps/manager">
-    <Valve className="org.apache.catalina.valves.RemoteAddrValve" allow="^.*$" />
-</Context>
-' > /opt/tomcat/conf/Catalina/localhost/manager.xml 
-
-rm -rf /opt/tomcat/conf/tomcat-users.xml 
-echo '
-<?xml version="1.0" encoding="UTF-8"?>
-<tomcat-users xmlns="http://tomcat.apache.org/xml"
-              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-              xsi:schemaLocation="http://tomcat.apache.org/xml tomcat-users.xsd"
-              version="1.0">
-  <role rolename="manager-gui"/>
-  <user username="tomcat" password="password" roles="manager-gui"/>
-  <role rolename="admin-gui"/>
-  <user username="tomcat" password="password" roles="manager-gui,admin-gui"/>
-
-</tomcat-users>
-' > /opt/tomcat/conf/tomcat-users.xml 
-systemctl restart tomcat
-
-# install web-app
+# install web-app on Tomcat
 if [ -d "/opt/tomcat/webapps/TestApp" ]; then
     sudo rm -f /opt/tomcat/webapps/TestApp.war
     sudo rm -rf /opt/tomcat/webapps/TestApp
@@ -132,3 +100,24 @@ sudo systemctl restart tomcat
 
 # permissions
 chmod 755 /opt/tomcat/logs/*
+
+# install logstash	
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+echo "
+[logstash-7.x]
+name=Elastic repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+" > /etc/yum.repos.d/logstash.repo
+
+sudo yum install -y logstash
+sudo systemctl start logstash.service
+
+# configuration
+cp /vagrant/custom.conf /etc/logstash/config.d/   
+sudo systemctl restart logstash.service
